@@ -1,20 +1,20 @@
 import smtplib 
 import tkinter as tk
 import re
+import classes 
 
 # ENTER EMAIL FIRST 
-email = 
+email = "PLACEHOLDER"   ######################################################################################
 match = re.compile(r'@(.+)')
-connect = smtplib.SMTP('smtp.'+match.search(email).group(1)), 587) # setting up connection 
+connect = smtplib.SMTP('smtp.'+match.search(email).group(1), 587) # setting up connection 
 connect.ehlo()  # starting connection
 connect.starttls()   # starting encryption before login 
 
-main = tk.Tk() 
-main.title("Email sender") 
-main.geometry("500x400") 
+root = classes.TkinterWindow('main', 'Email sender', '500x400') 
+root.construct_root()
 
-PassLabel = tk.Label(main, text = "Password for the email "+ email + ' : ')
-Pass_Entry = tk.Entry(main, width = 30, show = "*") 
+PassLabel = tk.Label(text = "Password for the email "+ email + ' : ')
+Pass_Entry = tk.Entry(width = 30, show = "*") 
 
 def login(): 
     try:
@@ -28,13 +28,13 @@ def login():
         PassLabel.configure(text = "Wrong password, try again")
         Pass_Entry.delete(0, 'end')
         
-button_password = tk.Button(main, text = "Log in", command = login)
-Receiver_Label = tk.Label(main, text = "To who do you want to send the emails to?")
-Receiver_Entry = tk.Entry(main, width = 30) 
-Subject_Label = tk.Label(main, text = "Enter the subject of the email: ")
-Subject_Entry = tk.Entry(main) 
-Content_Label = tk.Label(main, text = "Enter the message in the email: ") 
-Content_Entry = tk.Entry(main) 
+button_password = tk.Button(text = "Log in", command = login)
+Receiver_Label = tk.Label(text = "To who do you want to send the emails to?")
+Receiver_Entry = tk.Entry(width = 30) 
+Subject_Label = tk.Label(text = "Enter the subject of the email: ")
+Subject_Entry = tk.Entry() 
+Content_Label = tk.Label(text = "Enter the message in the email: ") 
+Content_Entry = tk.Entry() 
 
 def get_info():
     receiver_email = str(Receiver_Entry.get())
@@ -43,10 +43,10 @@ def get_info():
     message = "Subject: " + Subject + "\n\n" + Content + "\n" 
     connect.sendmail(email, receiver_email, message)
     connect.quit() 
-    main.destroy()
+    root.destroy_root()
     
 
-button_launch = tk.Button(main, text = "Press to send the emails", command = get_info) 
+button_launch = tk.Button(text = "Press to send the emails", command = get_info) 
 
 PassLabel.pack()
 Pass_Entry.pack()
@@ -58,7 +58,7 @@ Subject_Entry.pack()
 Content_Label.pack()
 Content_Entry.pack()
 button_launch.pack()
-main.mainloop()
+root.show_root() 
 
 
 
