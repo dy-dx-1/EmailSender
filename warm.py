@@ -4,27 +4,34 @@ import re
 import classes 
 
 # ENTER EMAIL FIRST 
-email = "PLACEHOLDER"   ######################################################################################
-match = re.compile(r'@(.+)')
-connect = smtplib.SMTP('smtp.'+match.search(email).group(1), 587) # setting up connection 
+sender_email = "PLACEHOLDER"   ######################################################################################
+match = re.compile(r'@(.+)')  # to get the smtp from the email ; NEED ADD SUPPORT FOR OTHER PORTS AND EMAIL TYPES 
+
+connect = smtplib.SMTP('smtp.'+match.search(sender_email).group(1), 587) # setting up connection 
 connect.ehlo()  # starting connection
 connect.starttls()   # starting encryption before login 
 
 root = classes.TkinterWindow('main', 'Email sender', '500x400') 
 root.construct_root()
 
-PassLabel = tk.Label(text = "Password for the email "+ email + ' : ')
+PassLabel = tk.Label(text = "Password for the email "+ sender_email + ' : ')
 Pass_Entry = tk.Entry(width = 30, show = "*") 
 
 def login(): 
-    try:
-        key = str(Pass_Entry.get())
-        connect.login(email, key) # login
+    try:                                # First attempting log in 
+        key = Pass_Entry.get()
+        connect.login(sender_email, key) 
         PassLabel.configure(text = "Logged in!")
-        Pass_Entry.delete(0, 'end')
-        button_password.configure(state = tk.DISABLED) 
-        
-    except smtplib.SMTPAuthenticationError:  
+        button_password.configure(state = tk.DISABLED)    
+        Receiver_Label.pack()
+        Receiver_Entry.pack()
+        Subject_Label.pack()
+        Subject_Entry.pack()
+        Content_Label.pack()
+        Content_Entry.pack()
+        button_launch.pack()
+           
+    except smtplib.SMTPAuthenticationError:   # If the password is incorrect 
         PassLabel.configure(text = "Wrong password, try again")
         Pass_Entry.delete(0, 'end')
         
@@ -37,11 +44,11 @@ Content_Label = tk.Label(text = "Enter the message in the email: ")
 Content_Entry = tk.Entry() 
 
 def get_info():
-    receiver_email = str(Receiver_Entry.get())
-    Subject = str(Subject_Entry.get()) 
-    Content = str(Content_Entry.get())
-    message = "Subject: " + Subject + "\n\n" + Content + "\n" 
-    connect.sendmail(email, receiver_email, message)
+    receiver_email = Receiver_Entry.get()
+
+    message = classes.email(Subject_Entry.get(), Content_Entry.get()).get_msg()
+
+    connect.sendmail(sender_email, receiver_email, message)
     connect.quit() 
     root.destroy_root()
     
@@ -51,13 +58,6 @@ button_launch = tk.Button(text = "Press to send the emails", command = get_info)
 PassLabel.pack()
 Pass_Entry.pack()
 button_password.pack()
-Receiver_Label.pack()
-Receiver_Entry.pack()
-Subject_Label.pack()
-Subject_Entry.pack()
-Content_Label.pack()
-Content_Entry.pack()
-button_launch.pack()
 root.show_root() 
 
 
