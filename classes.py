@@ -18,3 +18,10 @@ class TkinterWindow:
 
     def destroy_root(self): 
         self.root.destroy() 
+
+class email: 
+    def __init__(self, subject, message): 
+        self.subject = subject 
+        self.message = message 
+    def get_msg(self): 
+        return "Subject: " + self.subject + "\n\n" + self.message + "\n"  # Uhhh don't remember if that last \n is necessary 
