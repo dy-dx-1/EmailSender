@@ -95,11 +95,11 @@ def spam_clock(n):
         if n % 50 == 0:                                                     # Every 50 emails 
             u = 60                              
             while u != 0:                                       
-                count_label.configure(text = "Sleeping, " + str(u) + " seconds left!")
+                print("Sleeping, " + str(u) + " seconds left!")
                 u-=1 
                 sleep(1)                                                    # Wait 60s in total 
         else:                                                               # If not sleeping
-            count_label.configure(text = "Email #"+ str(n) +"sent")
+            print("Email #"+ str(n) +"sent")
             sleep(0.6)                                                      # Send an email every 0.6s 
 
 def activate_spam():                                                        # Turning spam mode on and off 
