@@ -72,10 +72,10 @@ def send_emails(q):
     try:
         q = int(float(q))                                                       # If float is inputed, convert to int 
     except ValueError:                                                      
-        count_label.configure(text = "Email count must be an integer!")         # If str is inputed ValueError will be raised 
+        print("Email count must be an integer!")         # If str is inputed ValueError will be raised 
     else:
         if q>1000 or q<=0:                                                      # If person inputed too large number or a negative number
-            count_label.configure(text = "Email count must be between 0 and 1000!")
+            print("Email count must be between 0 and 1000!")
 
         else: 
             if spam_mode == 1:                                                  # If the spam mode is on 
