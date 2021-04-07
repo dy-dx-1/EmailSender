@@ -13,30 +13,25 @@ def get_provider():
         return None, None                                       # If this is called, then match didn't find anything (provider is None)
     else: 
         port = 587                                              # Storing the provider in their 'smtp' format and appropiate port
-        if provider == 'hotmail' or provider == "outlook":
-            smtp_s = 'smtp-mail.outlook.com' 
-        elif provider == "gmail": 
-            smtp_s = 'smtp.gmail.com' 
-        elif provider == 'yahoo':
-            smtp_s = 'smtp.mail.yahoo.com'
+        if provider == 'hotmail' or provider == "outlook": smtp_s = 'smtp-mail.outlook.com'           
+        elif provider == "gmail": smtp_s = 'smtp.gmail.com'            
+        elif provider == 'yahoo': smtp_s = 'smtp.mail.yahoo.com'   
         elif provider == "att":
             smtp_s = 'smtp.mail.att.net'
             port = 465
-        elif provider == "comcast": 
-            smtp_s = "smtp.comcast.net" 
+        elif provider == "comcast": smtp_s = "smtp.comcast.net"             
         elif provider == "verizon": 
             smtp_s = "smtp.verizon.net"
             port = 465
         else: 
             return None, None                                 # If this is called, the provider is not supported yet
-        
         return smtp_s, port 
 
         
 def login(): 
     global sender_email                                                         # Global variables to reuse them in send_emails() 
     global connect 
-    sender_email = sender_email_Entry.get()                                     # Getting sender email 
+    sender_email = sender_email_Entry.get().strip()                             # Getting sender email 
 
     (smtp_server, port) = get_provider()                                        # Getting the provider and the appropiate port
 
@@ -67,29 +62,34 @@ def login():
             button_launch.pack(side = tk.LEFT)                                  # Let the message creation entries appear 
             button_spam.pack(side = tk.RIGHT)                                   # Let the 'spam mode' button appear 
 
-def send_emails(q):                                                             
+
+def send_emails(q):                                                            
     receiver_email = Receiver_Entry.get()                                       # Getting receiver email 
+    if q == "": q = 1                                              # if there's spam mode is off, q will be "\n" so just set to 1 to send 1 email 
     try:
         q = int(float(q))                                                       # If float is inputed, convert to int 
     except ValueError:                                                      
-        count_label.configure(text = "Email count must be an integer!")         # If str is inputed ValueError will be raised 
+        count_label.configure(text ="Email count must be an integer!")         # If str is inputed ValueError will be raised 
     else:
         if q>1000 or q<=0:                                                      # If person inputed too large number or a negative number
-            count_label.configure(text = "Email count must be between 0 and 1000!")
-
+            count_label.configure(text ="Email count must be between 0 and 1000!")
         else: 
             if spam_mode == 1:                                                  # If the spam mode is on 
                 for n in range(1, q+1):                                         # Send the multiple emails
-                    message = classes.email(Subject_Entry.get()+str(n),
-                     Content_Entry.get()).get_msg()                         # Add a number to the title to prevent email merging emails in one
+                    count_label.configure(text ="Emails are being sent!")
+                    message = classes.email_msg(Subject_Entry.get()+str(n),\
+                        Content_Entry.get()).get_msg()                      # Add a number to the title to prevent email merging emails in one
                     connect.sendmail(sender_email, receiver_email, message) # Send the mail 
                     spam_clock(n)                                           # Run the clock to avoid blocking from provider 
 
-            else:                                                                 #If spam mode is off 
-                message = classes.email(Subject_Entry.get(), Content_Entry.get()).get_msg() # Getting message (without number this time)
-                connect.sendmail(sender_email, receiver_email, message)                     # Send email 
+            elif spam_mode == -1:                                                                           #If spam mode is off 
+                message = classes.email_msg(Subject_Entry.get(), Content_Entry.get()).get_msg()             # Getting message (without number this time)
+                connect.sendmail(sender_email, receiver_email, message)                                     # Send email 
+                print("Email sent!")
+                sleep(5)
             connect.quit()                                                  # Disconnect from service 
             root.destroy_root()                                             # Destroy window and close program 
+
 
 def spam_clock(n):                                                          
         if n % 50 == 0:                                                     # Every 50 emails 
@@ -102,16 +102,17 @@ def spam_clock(n):
             print("Email #"+ str(n) +"sent")
             sleep(0.6)                                                      # Send an email every 0.6s 
 
+
 def activate_spam():                                                        # Turning spam mode on and off 
     global spam_mode                                                        # Global to call it in send_emails() 
-    spam_mode = spam_mode*-1                                                
+    spam_mode = spam_mode*-1  
+    print(spam_mode)                                             
     if spam_mode == 1:                                                      
         count_label.pack()                                                   
         count_entry.pack()                                                  # Make the spam mode settings appear when on 
     else: 
         count_label.pack_forget()
         count_entry.pack_forget()                                           # Remove the settings if spam mode is off 
-
 
 
 root = classes.TkinterWindow('main', 'Email sender', '700x300')             # Setting up window settings 
@@ -134,11 +135,13 @@ Content_Entry = tk.Entry()                                                  # En
 button_launch = tk.Button(text = "Press to send the emails", command = lambda: send_emails(count_entry.get())) 
 # Button to send the emails, the command activates send_emails() with the number of emails to send as attribute -> count_entry.get() 
 
+
 # For spam mode 
 spam_mode = -1                                                              # -1 means off 
 button_spam = tk.Button(text = "Activate 'spam' mode ", command = activate_spam)                    # Button to activate spam mode 
 count_label = tk.Label(text ="How many emails do you want to send? (Must be <=1000)", width = 70)   
 count_entry = tk.Entry(width = 3)                                                                   # Entering number of emails to send
+
 
 # These are packed here because all the other packs are inside functions to make them appear when needed 
 sender_email_Label.pack()                                                   
@@ -147,6 +150,3 @@ PassLabel.pack()
 Pass_Entry.pack()
 button_password.pack()                      # Packing the sender email, password and login button entries and labels 
 root.show_root()                            # Show the window          
-
-
-
