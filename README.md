@@ -6,6 +6,8 @@ The main tkinter window is created from the TkinterWindow class to save space. L
 
 Supports Gmail, Outlook, Hotmail, Yahoo, AT&T, Comcast and Verizon. User needs to allow "less secure app access" in account settings if necessary. 
 
+Take into consideration that this is only for demonstration purposes, I am not responsible for what you do with this code :    ) 
+
 # Simple user guide 
 
     1) Input your login credentials and press "Log in". 
@@ -20,3 +22,6 @@ Supports Gmail, Outlook, Hotmail, Yahoo, AT&T, Comcast and Verizon. User needs t
         *Take into consideration that the window might freeze in spam mode, don't worry tough, the messages will continue being sent.* 
 
     4) When you are ready, press the button on the left to send the emails/email. 
+
+
+

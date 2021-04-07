@@ -25,3 +25,5 @@ class email_msg:
         self.message = message 
     def get_msg(self): 
         return "Subject: " + self.subject + "\n\n" + self.message + "\n"  # Uhhh don't remember if that last \n is necessary 
+
+
