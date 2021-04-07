@@ -19,7 +19,7 @@ class TkinterWindow:
     def destroy_root(self): 
         self.root.destroy() 
 
-class email: 
+class email_msg: 
     def __init__(self, subject, message): 
         self.subject = subject 
         self.message = message 
