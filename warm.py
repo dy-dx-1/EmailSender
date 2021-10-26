@@ -1,152 +1,142 @@
 import smtplib 
 import tkinter as tk
-import re
-import classes 
+import assets 
 from time import sleep 
+from json import load 
 
+with open("colors.json", "r") as j_file:                                        # Letting python handle the opening and closing of the file 
+    colors = load(j_file)
 
-def get_provider(): 
-    match = re.compile(r'@(.+).com')                            # Regex to find the provider from the email 
-    try:    
-        provider = match.search(sender_email).group(1)          # Store it in the 'provider' variable 
-    except AttributeError:                                      
-        return None, None                                       # If this is called, then match didn't find anything (provider is None)
-    else: 
-        port = 587                                              # Storing the provider in their 'smtp' format and appropiate port
-        if provider == 'hotmail' or provider == "outlook": smtp_s = 'smtp-mail.outlook.com'           
-        elif provider == "gmail": smtp_s = 'smtp.gmail.com'            
-        elif provider == 'yahoo': smtp_s = 'smtp.mail.yahoo.com'   
-        elif provider == "att":
-            smtp_s = 'smtp.mail.att.net'
-            port = 465
-        elif provider == "comcast": smtp_s = "smtp.comcast.net"             
-        elif provider == "verizon": 
-            smtp_s = "smtp.verizon.net"
-            port = 465
-        else: 
-            return None, None                                 # If this is called, the provider is not supported yet
-        return smtp_s, port 
+def login(s_email_entry, s_email_label, pass_entry, pass_label): 
+    global connect                                            # connect is global because its a unique obj that will need to be referenced later
+    s_email = s_email_entry.get().strip()                                       # Getting sender email 
 
-        
-def login(): 
-    global sender_email                                                         # Global variables to reuse them in send_emails() 
-    global connect 
-    sender_email = sender_email_Entry.get().strip()                             # Getting sender email 
-
-    (smtp_server, port) = get_provider()                                        # Getting the provider and the appropiate port
+    (smtp_server, port) = assets.get_provider(s_email)                          # Getting the provider and the appropiate port
 
     if (smtp_server, port) == (None, None):                                     # if nothing is returned, get_provider() didn't find a supported email
-        sender_email_Label.configure(text = "Sorry that email provider is not supported")                 
+        s_email_label.configure(text = "Sorry that email provider is not supported")                 
     else: 
         connect = smtplib.SMTP(smtp_server, port)                               # setting up connection 
         connect.ehlo()                                                          # starting connection
         connect.starttls()                                                      # starting encryption before login
         try:                                                                    # First attempting log in 
-            key = Pass_Entry.get()                                              # Getting password 
-            connect.login(sender_email, key)                                    # Logging in 
+            key = pass_entry.get()                                              # Getting password 
+            connect.login(s_email, key)                                         # Logging in 
             
         except smtplib.SMTPAuthenticationError:                                 # If the password is incorrect 
-            PassLabel.configure(text = "Wrong password, try again")
-            Pass_Entry.delete(0, 'end')                                         # Clear the entry 
+            s_email_label.configure(text = "Wrong password, try again", bg = colors["login_failure"]["sender_email_Label"])
+            pass_label.configure(bg = colors["login_failure"]["PassLabel"])
+            pass_entry.delete(0, 'end')                                         # Clear the entry 
         
         else:                                                                   # If log in was successful 
-            PassLabel.configure(text = "Logged in!")                             
+            s_email_label.configure(text = "Logged in!", bg = colors["login_success"]["sender_email_Label"])  
+            pass_label.configure(bg = colors["login_success"]["PassLabel"])                           
             button_password.configure(state = tk.DISABLED)                      # Disable button to log in 
 
-            Receiver_Label.pack()                                                
-            Receiver_Entry.pack()
-            Subject_Label.pack()
-            Subject_Entry.pack()
-            Content_Label.pack()
-            Content_Entry.pack()
+            root.resize_root("591x399")
+            assets.pack_widgets(widgets_after_login)
             button_launch.pack(side = tk.LEFT)                                  # Let the message creation entries appear 
             button_spam.pack(side = tk.RIGHT)                                   # Let the 'spam mode' button appear 
 
 
-def send_emails(q):                                                            
-    receiver_email = Receiver_Entry.get()                                       # Getting receiver email 
-    if q == "": q = 1                                              # if there's spam mode is off, q will be "\n" so just set to 1 to send 1 email 
+def send_emails(q, s_email_entry):    
+    s_email = s_email_entry.get().strip()                                                         
+    receiver_email = Receiver_Entry.get().strip()                               # Getting receiver email 
+    if q == "": q = 1                                              # if there's spam mode is off, q will be "" so just set to 1 to send 1 email 
     try:
         q = int(float(q))                                                       # If float is inputed, convert to int 
     except ValueError:                                                      
-        count_label.configure(text ="Email count must be an integer!")         # If str is inputed ValueError will be raised 
+        count_label.configure(text ="Email count must be an integer!")          # If str is inputed ValueError will be raised 
     else:
         if q>1000 or q<=0:                                                      # If person inputed too large number or a negative number
             count_label.configure(text ="Email count must be between 0 and 1000!")
         else: 
             if spam_mode == 1:                                                  # If the spam mode is on 
+                count_label.configure(text ="Emails are being sent!")           
                 for n in range(1, q+1):                                         # Send the multiple emails
-                    count_label.configure(text ="Emails are being sent!")
-                    message = classes.email_msg(Subject_Entry.get()+str(n),\
-                        Content_Entry.get()).get_msg()                      # Add a number to the title to prevent email merging emails in one
-                    connect.sendmail(sender_email, receiver_email, message) # Send the mail 
-                    spam_clock(n)                                           # Run the clock to avoid blocking from provider 
+                    message = assets.email_msg(Subject_Entry.get()+str(n),\
+                        Content_Entry.get("1.0", tk.END)).get_msg()                          # Add a number to the title to prevent email merging emails in one
+                    connect.sendmail(s_email, receiver_email, message)          # Send the mail 
+                    assets.spam_clock(n)                                        # Run the clock to avoid blocking from provider 
 
-            elif spam_mode == -1:                                                                           #If spam mode is off 
-                message = classes.email_msg(Subject_Entry.get(), Content_Entry.get()).get_msg()             # Getting message (without number this time)
-                connect.sendmail(sender_email, receiver_email, message)                                     # Send email 
+            elif spam_mode == -1:                                                                          #If spam mode is off 
+                message = assets.email_msg(Subject_Entry.get(), Content_Entry.get("1.0", tk.END)).get_msg()             # Getting message (without number this time)
+                connect.sendmail(s_email, receiver_email, message)                                         # Send email 
                 print("Email sent!")
-                sleep(5)
+            sleep(1)
             connect.quit()                                                  # Disconnect from service 
             root.destroy_root()                                             # Destroy window and close program 
 
 
-def spam_clock(n):                                                          
-        if n % 50 == 0:                                                     # Every 50 emails 
-            u = 60                              
-            while u != 0:                                       
-                print("Sleeping, " + str(u) + " seconds left!")
-                u-=1 
-                sleep(1)                                                    # Wait 60s in total 
-        else:                                                               # If not sleeping
-            print("Email #"+ str(n) +"sent")
-            sleep(0.6)                                                      # Send an email every 0.6s 
-
-
-def activate_spam():                                                        # Turning spam mode on and off 
-    global spam_mode                                                        # Global to call it in send_emails() 
-    spam_mode = spam_mode*-1  
-    print(spam_mode)                                             
-    if spam_mode == 1:                                                      
-        count_label.pack()                                                   
-        count_entry.pack()                                                  # Make the spam mode settings appear when on 
-    else: 
-        count_label.pack_forget()
-        count_entry.pack_forget()                                           # Remove the settings if spam mode is off 
-
-
-root = classes.TkinterWindow('main', 'Email sender', '700x300')             # Setting up window settings 
+root = assets.TkinterWindow('main', 'Email sender', '229x134')              # Setting up window settings 
 root.construct_root()                                                       # Creating window 
 
 sender_email_Label = tk.Label(text = "Your email address: ")                
-sender_email_Entry = tk.Entry(width = 30)                                   # Entering sender email 
 PassLabel = tk.Label(text = "Password for the email: ")
+
+sender_email_Entry = tk.Entry(width = 30)                                   # Entering sender email
 Pass_Entry = tk.Entry(width = 30, show = "*")                               # Entering password and hiding it with **** 
-button_password = tk.Button(text = "Log in", command = login)               # Login button 
+
+button_password = tk.Button(text = "Log in", command = lambda: login(sender_email_Entry, sender_email_Label, Pass_Entry, PassLabel))     
+
+widgets_login = [sender_email_Label, sender_email_Entry, PassLabel, Pass_Entry, button_password] # List of the widgets that are needed for login 
 
 # The next section appears after login 
 
 Receiver_Label = tk.Label(text = "To who do you want to send the emails to?")   
-Receiver_Entry = tk.Entry(width = 30)                                       # Entering receiver email 
 Subject_Label = tk.Label(text = "Enter the subject of the email: ")
-Subject_Entry = tk.Entry()                                                  # Entering subject of the email 
 Content_Label = tk.Label(text = "Enter the message in the email: ") 
-Content_Entry = tk.Entry()                                                  # Entering content of the email 
-button_launch = tk.Button(text = "Press to send the emails", command = lambda: send_emails(count_entry.get())) 
+
+Receiver_Entry = tk.Entry(width = 30)                                       # Entering receiver email 
+Subject_Entry = tk.Entry()                                                  # Entering subject of the email 
+Content_Entry = tk.Text(height = 5, width = 30) 
+                                                 # Entering content of the email 
+button_launch = tk.Button(text = "Press to send the emails", command = lambda: send_emails(count_entry.get(), sender_email_Entry)) 
+
+widgets_after_login = [Receiver_Label, Receiver_Entry, Subject_Label, Subject_Entry, Content_Label, Content_Entry] 
 # Button to send the emails, the command activates send_emails() with the number of emails to send as attribute -> count_entry.get() 
 
+# For spam mode
+def activate_spam(label1, entry1, label2, button1):                    # Turning spam mode on and off
+    global spam_mode                                                  # Global to keep track of the spam mode 'status'  
+    spam_mode = spam_mode*-1                                               
+    if spam_mode == 1:  
+        root.color_root(colors["spam_on"]["background_color"])                                                    
+        label1.pack()                                                   
+        entry1.pack()                                                  # Make the spam mode settings appear when on 
+        label2.pack(side = tk.LEFT, anchor = tk.SW, ipady = 7) 
+        button1.pack(side = tk.RIGHT, anchor = tk.SE, ipady = 7)
+    else: 
+        root.color_root(colors["spam_off"]["background_color"])
+        label1.pack_forget()
+        entry1.pack_forget()                                           # Remove the settings if spam mode is off 
+        label2.pack_forget() 
+        button1.pack_forget()
 
-# For spam mode 
+def get_estimate(entry, label): 
+    q = entry.get() 
+    if q == "": q = 1                                                           # if there's spam mode is off, q will be "" so just set to 1 to send 1 email
+    try:
+        q = int(float(q))                                                       # If float is inputed, convert to int 
+    except ValueError:                                                      
+        count_label.configure(text ="Email count must be an integer!")          # If str is inputed ValueError will be raised 
+    else:
+        if q>1000 or q<=0:                                                      # If person inputed too large number or a negative number
+            count_label.configure(text ="Email count must be between 0 and 1000!")
+        else: 
+            qtt_sleeps = int(q/50) * 60
+            total_time = int(qtt_sleeps + ((q-1)*0.6))
+            label.configure(text = f"Estimated time in sec: {total_time}")
+
 spam_mode = -1                                                              # -1 means off 
-button_spam = tk.Button(text = "Activate 'spam' mode ", command = activate_spam)                    # Button to activate spam mode 
+button_spam = tk.Button(text = "Activate 'spam' mode ", command = lambda: activate_spam(count_label, count_entry, time_est, estimate_time))
 count_label = tk.Label(text ="How many emails do you want to send? (Must be <=1000)", width = 70)   
-count_entry = tk.Entry(width = 3)                                                                   # Entering number of emails to send
-
+count_entry = tk.Entry(width = 5)                                                                   # Entering number of emails to send
+time_est = tk.Label(text = "Estimated time in sec: ") 
+estimate_time = tk.Button(text = "Press to get estimate", command = lambda: get_estimate(count_entry, time_est))
 
 # These are packed here because all the other packs are inside functions to make them appear when needed 
-sender_email_Label.pack()                                                   
-sender_email_Entry.pack()                                                   
-PassLabel.pack()
-Pass_Entry.pack()
-button_password.pack()                      # Packing the sender email, password and login button entries and labels 
-root.show_root()                            # Show the window          
+assets.pack_widgets(widgets_login)                      # Packing the sender email, password and login button entries and labels 
+root.show_root()                                        # Show the window          
+
+# TODO: TIME ESTIMATE 

@@ -1,0 +1,19 @@
+{
+    "login_success" : {
+        "sender_email_Label" : "#00ff3c", 
+        "PassLabel" : "#00ff3c"
+    },
+
+    "login_failure" : {
+        "sender_email_Label" : "#ff1100", 
+        "PassLabel" : "#ff1100"
+    },
+
+    "spam_on" : {
+        "background_color" : "#fbff00" 
+    },
+
+    "spam_off" : {
+        "background_color" : "#d4cfcf"
+    }
+}
