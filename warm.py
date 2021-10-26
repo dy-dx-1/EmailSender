@@ -138,5 +138,3 @@ estimate_time = tk.Button(text = "Press to get estimate", command = lambda: get_
 # These are packed here because all the other packs are inside functions to make them appear when needed 
 assets.pack_widgets(widgets_login)                      # Packing the sender email, password and login button entries and labels 
 root.show_root()                                        # Show the window          
-
-# TODO: TIME ESTIMATE 
