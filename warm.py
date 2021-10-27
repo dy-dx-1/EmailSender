@@ -4,8 +4,8 @@ import assets
 from time import sleep 
 from json import load 
 
-with open("colors.json", "r") as j_file:                                        # Letting python handle the opening and closing of the file 
-    colors = load(j_file)
+
+print("salut") 
 
 def login(s_email_entry, s_email_label, pass_entry, pass_label): 
     global connect                                            # connect is global because its a unique obj that will need to be referenced later
