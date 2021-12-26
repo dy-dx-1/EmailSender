@@ -9,11 +9,11 @@
         "PassLabel" : "#ff1100"
     },
 
-    "spam_on" : {
+    "multiple_on" : {
         "background_color" : "#fbff00" 
     },
 
-    "spam_off" : {
+    "multiple_off" : {
         "background_color" : "#d4cfcf"
     }
 }

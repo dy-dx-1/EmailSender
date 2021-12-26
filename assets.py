@@ -29,15 +29,15 @@ class TkinterWindow:
         self.root.destroy() 
 
 
-class email_msg: 
+class Email_msg: 
     def __init__(self, subject, message): 
         self.subject = subject 
         self.message = message 
     def get_msg(self): 
-        return "Subject: " + self.subject + "\n\n" + self.message + "\n"  # Uhhh don't remember if that last \n is necessary 
+        return "Subject: " + self.subject + "\n\n" + self.message + "\n" 
 
 
-def spam_clock(n):                                                          
+def multiple_clock(n):                                                          
         if n % 50 == 0:                                                     # Every 50 emails 
             u = 60                              
             while u != 0:                                       
