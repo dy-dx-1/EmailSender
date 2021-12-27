@@ -19,7 +19,7 @@ Take into consideration that this is only for demonstration purposes.
         To avoid getting limited by email services, the emails will be sent at a 0.6s interval and the program will pause for 1min every 50 emails. 
         The email count and sleep status will be sent to the terminal that you're using. 
         The emails sent in this mode will all have the number of the email added next to the Subject to avoid them being all merged into one in the inbox.
-        Also consider that the window might freeze in spam mode, don't worry tough, the messages will continue being sent.
+        Also consider that the window might freeze in multiple emails mode, don't worry tough, the messages will continue being sent.
 
     4) When you are ready, press the button on the left to send the emails/email. 
 
